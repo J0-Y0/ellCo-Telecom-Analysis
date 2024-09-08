@@ -1,16 +1,48 @@
-# Analysis Performed
-## Descriptive Statistics
-- Headline Length: Calculated basic statistics for the length of news headlines.
-- Publisher Activity: Counted the number of articles per publisher to identify which publishers are most active.
-- Publication Date Trends: Analyzed publication dates to identify trends over time, such as increased news frequency on specific days or during specific events.
-## Text Analysis
-- Sentiment Analysis: 
-Analyzed the sentiment of headlines to gauge whether the tone of the news is positive, negative, or neutral.
-- Topic Modeling: 
-Used natural language processing to identify common keywords or phrases, potentially extracting topics or significant events.
-## Time Series Analysis
-- Publication Frequency: Examined how the frequency of publication varies over time and identified any spikes related to specific market events.
-- Publishing Times: Analyzed publishing times to reveal if there’s a specific time when most news is released.
-## Publisher Analysis
-- Active Publishers: Identified which publishers contribute the most to the news feed.
-Publisher Type: Compared the type of news reported by different publishers.
+# README
+
+## Summary
+
+This document provides a summary of the data analysis performed on TellCo, a mobile service provider in the Republic of Pefkakia. The analysis focused on user behavior and data consumption patterns to identify opportunities for improving profitability.
+
+## Key Actions
+
+1. **Data Preparation:**
+   - **Cleaning:** 
+     - Removed columns with more than 50% missing values.
+     - Imputed missing data for other columns.
+   - **Outliers:**
+     - Identified and removed outliers to ensure data accuracy.
+   - **Aggregation:**
+     - Aggregated data at the user level, including session durations and total data usage.
+
+2. **Exploratory Data Analysis (EDA):**
+   - **Univariate Analysis:** 
+     - Analyzed individual metrics for various applications.
+   - **Bivariate Analysis:** 
+     - Examined relationships between different types of data usage and total data consumption.
+   - **Correlation Analysis:** 
+     - Evaluated correlations between application data usage and overall data consumption.
+
+## Key Findings
+
+- **Top Data Consumers:** 
+  - YouTube and Netflix are the largest contributors to data usage.
+- **Gaming:** 
+  - Significant data usage observed; crucial for overall traffic.
+- **Session Duration:** 
+  - Longer sessions are associated with higher data consumption.
+- **Correlation Insights:** 
+  - Strong correlation between total data usage and video streaming applications.
+
+## Recommendations
+
+1. **Enhance Video Streaming Services:** 
+   - Improve performance and tailor data plans for heavy users of YouTube and Netflix.
+2. **Targeted Data Plans:** 
+   - Develop packages catering to high-volume users in video streaming and gaming.
+3. **Marketing Focus:** 
+   - Direct marketing efforts towards users with high data consumption.
+4. **Network Upgrades:** 
+   - Invest in infrastructure to efficiently support high data usage.
+
+For a comprehensive analysis, please refer to the full report.
