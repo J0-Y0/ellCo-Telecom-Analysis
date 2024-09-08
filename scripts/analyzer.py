@@ -106,7 +106,7 @@ class Analyzer:
             "Email DL (Bytes)": "sum",
             "Email UL (Bytes)": "sum",
             "Youtube DL (Bytes)": "sum",
-            "Youtube UL (Bytes)	": "sum",
+            "Youtube UL (Bytes)": "sum",
             "Netflix DL (Bytes)": "sum",
             "Netflix UL (Bytes)": "sum",
             "Gaming DL (Bytes)": "sum",
@@ -141,3 +141,38 @@ class Analyzer:
         ]
 
         return aggregated_data
+
+    def total_application_data(self, df):
+        df["Total Social Media Data"] = (
+            df["Social Media DL (Bytes)"] + df["Social Media UL (Bytes)"]
+        )
+        df["Total Google Data"] = df["Google DL (Bytes)"] + df["Google UL (Bytes)"]
+        df["Total Email Data"] = df["Email DL (Bytes)"] + df["Email UL (Bytes)"]
+        df["Total YouTube Data"] = df["Youtube DL (Bytes)"] + df["Youtube UL (Bytes)"]
+        df["Total Netflix Data"] = df["Netflix DL (Bytes)"] + df["Netflix UL (Bytes)"]
+        df["Total Gaming Data"] = df["Gaming DL (Bytes)"] + df["Gaming UL (Bytes)"]
+        df["Total Other Data"] = df["Other DL (Bytes)"] + df["Other UL (Bytes)"]
+
+        return df
+
+    def compute_correlations(self, df):
+        # Define columns for correlation
+        columns = [
+            "Total Social Media Data",
+            "Total Google Data",
+            "Total Email Data",
+            "Total YouTube Data",
+            "Total Netflix Data",
+            "Total Gaming Data",
+            "Total Other Data",
+            "Total DL (Bytes)",
+            "Total UL (Bytes)",
+        ]
+
+        df = self.total_application_data(df)
+        # Select relevant columns
+        data = df[columns]
+        # Compute the correlation matrix
+        correlation_matrix = data.corr()
+
+        return correlation_matrix
