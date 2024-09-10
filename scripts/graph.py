@@ -46,3 +46,74 @@ class Graph:
         )
         plt.title("Correlation Matrix Heatmap")
         plt.show()
+
+    def plot_engagement_cluster(self, df):
+        # Set up the visualization style
+        # sns.set(style="whitegrid")
+
+        # Step 5: Visualizing the clusters
+        fig, axes = plt.subplots(2, 3, figsize=(14, 10))
+
+        # Min Engagement
+        sns.barplot(x="Cluster", y="Min Engagement", data=df, ax=axes[0, 0])
+        axes[0, 0].set_title("Min Engagement per Cluster")
+
+        # Max Engagement
+        sns.barplot(x="Cluster", y="Max Engagement", data=df, ax=axes[0, 1])
+        axes[0, 1].set_title("Max Engagement per Cluster")
+
+        # Average Engagement
+        sns.barplot(x="Cluster", y="Average Engagement", data=df, ax=axes[0, 2])
+        axes[0, 2].set_title("Average Engagement per Cluster")
+
+        # Total Engagement
+        sns.barplot(x="Cluster", y="Total Engagement", data=df, ax=axes[1, 0])
+        axes[1, 0].set_title("Total Engagement per Cluster")
+        # Total Customer gement
+        sns.barplot(x="Cluster", y="Number of Customer", data=df, ax=axes[1, 2])
+        axes[1, 2].set_title("Customer per Cluster")
+
+        # Adjust layout for better viewing
+        plt.tight_layout()
+        plt.show()
+
+    def plot_most_used_apk(self, df):
+        # Step 3: Aggregate total traffic for each application across all users
+        total_traffic_per_app = {
+            "Google": df["Total Google Data"].sum(),
+            "Email": df["Total Email Data"].sum(),
+            "YouTube": df["Total YouTube Data"].sum(),
+            "Netflix": df["Total Netflix Data"].sum(),
+            "Gaming": df["Total Gaming Data"].sum(),
+            "Other": df["Total Other Data"].sum(),
+        }
+
+        # Convert to DataFrame for easier plotting
+        traffic_df = pd.DataFrame(
+            list(total_traffic_per_app.items()),
+            columns=["Application", "Total_Traffic"],
+        )
+
+        # Identify the top 3 most used applications
+        top_3_apps = traffic_df.nlargest(3, "Total_Traffic")
+
+        # Bar plot for total traffic
+        plt.figure(figsize=(12, 5))
+        sns.barplot(
+            x="Application", y="Total_Traffic", data=top_3_apps, palette="viridis"
+        )
+        plt.title("Top 3 Most Used Applications by Total Traffic")
+        plt.xlabel("Application")
+        plt.ylabel("Total Traffic (Bytes)")
+        plt.show()
+
+        # Pie chart for traffic distribution
+        plt.figure(figsize=(8, 8))
+        plt.pie(
+            top_3_apps["Total_Traffic"],
+            labels=top_3_apps["Application"],
+            autopct="%1.1f%%",
+            colors=sns.color_palette("viridis", 3),
+        )
+        plt.title("Traffic Distribution of Top 3 Most Used Applications")
+        plt.show()
