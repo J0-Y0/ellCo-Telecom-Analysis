@@ -44,10 +44,35 @@ class DbConnection:
         else:
             raise ConnectionError("SQLAlchemy engine is not available.")
 
-    def get_query(self):
+    def select_all_query(self):
         """Return SQL query to fetch all rows from the xdr_data table."""
         try:
             query = "SELECT * FROM public.xdr_data;"
+            return query
+        except Exception as e:
+            print(f"Failed to fetch query: {e}")
+            return None
+
+    def select_aggregate_query(self, agg_column, alias, function):
+        """
+        Return SQL query to aggregate xdr_data table.
+
+        Parameters:
+        column (str): Column to group by.
+        function (str): Aggregation function (e.g., 'SUM', 'AVG').
+        agg_column (str): Column to apply the aggregation function to.
+
+        Returns:
+        str: SQL query string.
+        """
+        try:
+            query = f"""
+            SELECT {agg_column} {alias} , {function}(*) 
+            FROM public.xdr_data
+            WHERE {agg_column} is  Not Null
+            GROUP BY {agg_column}
+            ORDER BY {function}({agg_column})  desc;
+            """
             return query
         except Exception as e:
             print(f"Failed to fetch query: {e}")

@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.cluster import KMeans
 
 
 class Analyzer:
@@ -116,7 +118,7 @@ class Analyzer:
         }
 
         # Group by user (assuming 'bearer id' is the user identifier)
-        aggregated_data = df.groupby("Bearer Id").agg(columns_to_aggregate)
+        aggregated_data = df.groupby("MSISDN/Number").agg(columns_to_aggregate)
 
         # Rename columns for clarity
         aggregated_data.columns = [
@@ -176,3 +178,30 @@ class Analyzer:
         correlation_matrix = data.corr()
 
         return correlation_matrix
+
+    def cluster(self, df, colum, k):
+        # Step 1: Normalize the 'count' column
+        scaler = MinMaxScaler()
+        df["normalized_count"] = scaler.fit_transform(df[[colum]])
+        # Step 2: Apply K-means clustering
+        kmeans = KMeans(n_clusters=k, random_state=42)
+        df["engagement_cluster"] = kmeans.fit_predict(df[["normalized_count"]])
+        return df
+
+    def user_traffic_per_apk(self, df):
+        df = self.total_application_data(df)
+        user_traffic = (
+            df.groupby("MSISDN/Number")
+            .agg(
+                {
+                    "Total Google Data": "sum",
+                    "Total Email Data": "sum",
+                    "Total YouTube Data": "sum",
+                    "Total Netflix Data": "sum",
+                    "Total Gaming Data": "sum",
+                    "Total Other Data": "sum",
+                }
+            )
+            .reset_index()
+        )
+        return user_traffic
