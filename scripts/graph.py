@@ -97,23 +97,30 @@ class Graph:
         # Identify the top 3 most used applications
         top_3_apps = traffic_df.nlargest(3, "Total_Traffic")
 
+        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+
         # Bar plot for total traffic
-        plt.figure(figsize=(12, 5))
         sns.barplot(
-            x="Application", y="Total_Traffic", data=top_3_apps, palette="viridis"
+            x="Application",
+            y="Total_Traffic",
+            data=top_3_apps,
+            hue="Application",
+            palette="viridis",  # Use palette directly if not using hue
+            ax=axes[0],
         )
-        plt.title("Top 3 Most Used Applications by Total Traffic")
-        plt.xlabel("Application")
-        plt.ylabel("Total Traffic (Bytes)")
-        plt.show()
+        axes[0].set_title("Top 3 Most Used Applications by Total Traffic")
+        axes[0].set_xlabel("Application")
+        axes[0].set_ylabel("Total Traffic (Bytes)")
 
         # Pie chart for traffic distribution
-        plt.figure(figsize=(8, 8))
-        plt.pie(
+        axes[1].pie(
             top_3_apps["Total_Traffic"],
             labels=top_3_apps["Application"],
             autopct="%1.1f%%",
             colors=sns.color_palette("viridis", 3),
+            startangle=140,
         )
-        plt.title("Traffic Distribution of Top 3 Most Used Applications")
+        axes[1].set_title("Traffic Distribution of Top 3 Most Used Applications")
+
+        plt.tight_layout()
         plt.show()
