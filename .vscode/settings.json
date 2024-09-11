@@ -1,3 +1,18 @@
 {
-    "editor.fontFamily": "setif"
+    "editor.fontFamily": "setif",
+    "cSpell.words": [
+        "codemirror",
+        "dtypes",
+        "fillna",
+        "iloc",
+        "ipython",
+        "isin",
+        "kernelspec",
+        "kmeans",
+        "MSISDN",
+        "nbconvert",
+        "nbformat",
+        "pygments",
+        "venv"
+    ]
 }

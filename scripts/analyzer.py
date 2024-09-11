@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import stats
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.cluster import KMeans
 
 
@@ -205,3 +205,151 @@ class Analyzer:
             .reset_index()
         )
         return user_traffic
+
+    def clean_customer_experience_data(self, df):
+
+        df["TCP UL Retrans. Vol (Bytes)"] = df["TCP UL Retrans. Vol (Bytes)"].fillna(
+            df["TCP UL Retrans. Vol (Bytes)"].mean()
+        )
+        df["TCP DL Retrans. Vol (Bytes)"] = df["TCP DL Retrans. Vol (Bytes)"].fillna(
+            df["TCP DL Retrans. Vol (Bytes)"].mean()
+        )
+
+        df["Avg RTT UL (ms)"] = df["Avg RTT UL (ms)"].fillna(
+            df["Avg RTT UL (ms)"].mean()
+        )
+        df["Avg RTT DL (ms)"] = df["Avg RTT DL (ms)"].fillna(
+            df["Avg RTT DL (ms)"].mean()
+        )
+        mode_value = df["Handset Type"].mode()
+
+        # Ensure mode calculation is not empty
+        if not mode_value.empty:
+            mode_value = mode_value[0]
+        else:
+            mode_value = "Unknown"  # Default value if mode calculation fails
+
+        # Replace 'undefined' with the mode
+        df["Handset Type"] = df["Handset Type"].replace("undefined", mode_value)
+
+        # Fill remaining NaN values with the mode
+        df["Handset Type"] = df["Handset Type"].fillna(mode_value)
+
+        def handle_outliers(column):
+            column = column.copy()
+            mean_val = column.mean()
+            std_dev = column.std()
+            z_scores = (column - mean_val).abs() / std_dev
+            outliers = z_scores > 3
+            column.loc[outliers] = mean_val
+            return column
+
+        df["TCP UL Retrans. Vol (Bytes)"] = handle_outliers(
+            df["TCP UL Retrans. Vol (Bytes)"]
+        )
+        df["TCP DL Retrans. Vol (Bytes)"] = handle_outliers(
+            df["TCP DL Retrans. Vol (Bytes)"]
+        )
+
+        df["Avg RTT UL (ms)"] = handle_outliers(df["Avg RTT UL (ms)"])
+        df["Avg RTT DL (ms)"] = handle_outliers(df["Avg RTT DL (ms)"])
+
+        return df
+
+    def aggregate_customer_experience(self, df):
+
+        df["TCP Retransmission"] = (
+            df["TCP UL Retrans. Vol (Bytes)"] + df["TCP DL Retrans. Vol (Bytes)"]
+        )
+        df["RTT"] = df["Avg RTT UL (ms)"] + df["Avg RTT DL (ms)"]
+
+        # Step 3: Calculate throughput (Total DL + Total UL) / Duration
+        df["Throughput"] = (df["Total DL (Bytes)"] + df["Total UL (Bytes)"]) / df[
+            "Dur. (ms)"
+        ]
+
+        # Step 4: Aggregate per customer (MSISDN/Number)
+        customer_agg = (
+            df.groupby("MSISDN/Number")
+            .agg(
+                {
+                    "TCP Retransmission": "mean",
+                    "RTT": "mean",
+                    "Throughput": "mean",
+                    "Handset Type": lambda x: x.mode()[
+                        0
+                    ],  # Most frequent handset type per customer
+                }
+            )
+            .reset_index()
+        )
+
+        return customer_agg
+
+    def compute_top_bottom_frequent(self, df):
+        results = {}
+
+        # Compute Top, Bottom, and Most Frequent for each metric
+
+        metrics = ["TCP Retransmission", "RTT", "Throughput"]
+
+        for metric in metrics:
+            # Top 10 values
+            top_10 = df[metric].nlargest(10)
+
+            # Bottom 10 values
+            bottom_10 = df[metric].nsmallest(10)
+
+            # Most frequent 10 values
+            most_frequent_10 = df[metric].value_counts().nlargest(10)
+
+            results[metric] = {
+                "Top 10": top_10,
+                "Bottom 10": bottom_10,
+                "Most Frequent 10": most_frequent_10,
+            }
+
+        return results
+
+    def cluster_data(self, user_data):
+        user_data_numeric = user_data.drop(columns="Handset Type")
+
+        # Normalize the data
+        scaler = StandardScaler()
+        scaled_data = scaler.fit_transform(user_data_numeric)
+
+        # Apply k-means clustering
+        kmeans = KMeans(n_clusters=3, random_state=42)
+        clusters = kmeans.fit_predict(scaled_data)
+
+        # Add cluster labels to the original data
+        user_data["Cluster"] = clusters
+        return user_data
+
+    def group_cluster_data(self, df):
+        df_grouped = (
+            df.groupby("Cluster")
+            .agg(
+                {
+                    "MSISDN/Number": "count",  # Count the number of users in each cluster
+                    "TCP Retransmission": "mean",  # Calculate the average TCP retransmission
+                    "RTT": "mean",  # Calculate the average RTT
+                    "Throughput": "mean",  # Calculate the average throughput
+                    "Handset Type": "count",  # Count the number of handsets in each cluster
+                }
+            )
+            .reset_index()
+        )
+
+        # Rename columns to more descriptive names
+        df_grouped = df_grouped.rename(
+            columns={
+                "MSISDN/Number": "Number of Users",
+                "TCP Retransmission": "Average TCP Retransmission",
+                "RTT": "Average RTT",
+                "Throughput": "Average Throughput",
+                "Handset Type": "Number of Handsets",
+            }
+        )
+
+        return df_grouped
